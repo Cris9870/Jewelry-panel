@@ -5,7 +5,8 @@
       "Bash(npx create-react-app:*)",
       "Bash(npm create:*)",
       "Bash(npm install:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }
