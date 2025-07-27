@@ -1,1 +1,25 @@
 # Jewelry-panel
+
+- Debe poder almacenarse en un servidor Plesk
+- Los cambios que se le realicen  deben de ser posibles de forma rapida.
+- La funcion principal de la aplicacion es llevar la parte administrativa de pedidos de clientes y gestion de stock de productos.
+- Será usada (al menos por ahora) por una joyería.
+- Para los pedidos desean que se genere un PDF (tipo una boleta de compra, pero solo representativa). Me imagino que aquí sería una plantilla con campos para editar.
+- Debe ser posible subir los datos de productos, stock y fotos (todos almacenados en el mismo servidor).
+- Debe tener la opcion de crear, editar y borrar productos de forma individual
+- Debe tener la opcion de crear, editar y borrar productos de forma masiva mediante la subida de un documento de excel
+- El documento PDF de pedido no debe tener IGV contemplado
+- El documento PDF debe tener todos los productos comprados por el cliente y mostrarlos como una lista de nombre del producto, precio unitario, cantidad, monto total. Así como tambien los datos de la tienda y los datos del cliente.
+- Los productos posen Nombre del producto,sku, precio, categoría, atributos, cantidad de stock.
+- Debe existir un panel principal donde se muestren todo el dinero de venta totales recaudado, cantidad de ventas realizadas, ordenes pendientes, etc
+- Dentro del panel debe haber un apartado para crear los perfiles de clientes y poder poner la información del mismo (esto tambien estaría integrado con el apartado de PEDIDOS, así solo se indicaría el nombre del cliente y el sistema jalaría los datos del mismo.
+- Debe existir un campo de búsqueda para buscar a los clientes que se hayan registrado como pedidos tambien.
+- Esta aplicación web será manejada directamente por el administrado de la tienda de joyas y no por sus clientes de ellos.
+- Cada pedido debe tener estados, como "Pendiente de Pago", "Cancelado", "Pagado".
+- Cada pedido debe tener un apartado de "Método de pago" con las opciones "Yape/Plin" (por defecto), "Efectivo", "Transf. bancaria", "Tarjeta".
+- El administrador creará el pedido (debe generarse un ID único de pedido automaticamente), afiliará al cliente (tambien debe existir la opción de anónimo), añadirá los productos. Debe poder ir viendo el listado de productos que va añadiendo como tambien los precios de estos y el total de dinero que se acumula para cobrar. 
+- Cuando el administrador guarde el pedido, automaticamente el sistema debe realizar el desconteo de stock.
+- El sistema debe tener en cuenta el stock al momento que el administrador añade productos a un pedido, para evitar que agregue productos sin stock.
+- El sistema debe ser muy visual y amigable, puesto que la persona que lo va a usar no sabe de código de programación y sería la primera vez que usará una aplicacion de gestion.
+- El pedido debe tener la opción de exportar PDF con todos los datos que tenga hasta ese momento (es el mismo PDF que se mencionó anteriormente).
+- Adjunto captura del estilo de diseño que se desea.
