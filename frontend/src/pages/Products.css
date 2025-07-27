@@ -1,0 +1,153 @@
+.products {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #c4955f;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+.products-filters {
+  margin-bottom: 20px;
+}
+
+.search-box {
+  position: relative;
+  max-width: 400px;
+}
+
+.search-box svg {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 12px 15px 12px 45px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.products-table-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.products-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.products-table th {
+  background-color: #f8f9fa;
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.products-table td {
+  padding: 15px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.products-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.product-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.product-name img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.stock {
+  font-weight: 500;
+}
+
+.stock.out-of-stock {
+  color: var(--danger-color);
+}
+
+.table-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.btn-icon {
+  padding: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.btn-icon:hover {
+  background-color: #f0f0f0;
+  color: var(--primary-color);
+}
+
+.btn-icon.btn-danger:hover {
+  background-color: #ffe0e0;
+  color: var(--danger-color);
+}

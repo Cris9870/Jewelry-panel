@@ -1,0 +1,93 @@
+.orders {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.orders-filters {
+  margin-bottom: 20px;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 300px;
+}
+
+.status-filter {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.orders-table-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.orders-table th {
+  background-color: #f8f9fa;
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.orders-table td {
+  padding: 15px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.orders-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.status-select {
+  padding: 6px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.status-select.status-pendiente-de-pago {
+  background-color: #fff3cd;
+  color: #856404;
+  border-color: #ffeaa7;
+}
+
+.status-select.status-pagado {
+  background-color: #d4edda;
+  color: #155724;
+  border-color: #c3e6cb;
+}
+
+.status-select.status-cancelado {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-color: #f5c6cb;
+}
+
+.order-details {
+  padding: 20px;
+}
+
+.order-details p {
+  margin-bottom: 10px;
+}
+
+.order-details strong {
+  font-weight: 600;
+  margin-right: 10px;
+}

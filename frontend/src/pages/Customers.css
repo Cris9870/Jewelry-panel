@@ -1,0 +1,38 @@
+.customers {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.customers-filters {
+  margin-bottom: 20px;
+}
+
+.customers-table-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.customers-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.customers-table th {
+  background-color: #f8f9fa;
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.customers-table td {
+  padding: 15px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.customers-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
