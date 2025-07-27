@@ -32,6 +32,20 @@ print_message "2/12 - Instalando Node.js..."
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
+# Verificar instalación de Node.js
+if ! command -v node &> /dev/null; then
+    print_message "Node.js no se instaló correctamente. Intentando método alternativo..."
+    # Método alternativo usando snap
+    sudo snap install node --classic --channel=18
+    sudo ln -sf /snap/bin/node /usr/bin/node
+    sudo ln -sf /snap/bin/npm /usr/bin/npm
+fi
+
+# Verificar versiones
+node_version=$(node -v 2>/dev/null || echo "No instalado")
+npm_version=$(npm -v 2>/dev/null || echo "No instalado")
+print_message "Node.js: $node_version, npm: $npm_version"
+
 # 3. Instalar MySQL (no interactivo)
 print_message "3/12 - Instalando MySQL..."
 sudo debconf-set-selections <<< "mysql-server mysql-server/root_password password $MYSQL_ROOT_PASSWORD"
@@ -41,7 +55,20 @@ sudo apt-get install -y mysql-server
 # 4. Instalar Nginx, PM2, Git
 print_message "4/12 - Instalando Nginx, PM2 y Git..."
 sudo apt-get install -y nginx git
-sudo npm install -g pm2
+
+# Esperar a que Node.js esté disponible y recargar PATH
+export PATH=$PATH:/usr/bin/node:/usr/bin/npm
+source ~/.bashrc
+
+# Verificar que npm está instalado
+if ! command -v npm &> /dev/null; then
+    print_message "ERROR: npm no se instaló correctamente. Reintentando..."
+    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+fi
+
+# Instalar PM2 globalmente usando la ruta completa de npm
+/usr/bin/npm install -g pm2
 
 # 5. Configurar base de datos
 print_message "5/12 - Configurando base de datos..."
