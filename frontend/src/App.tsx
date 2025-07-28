@@ -10,7 +10,7 @@ import './App.css';
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Products = lazy(() => import('./pages/Products'));
 const Customers = lazy(() => import('./pages/Customers'));
-const Orders = lazy(() => import('./pages/Orders'));
+const Orders = lazy(() => import(/* webpackPreload: true */ './pages/Orders'));
 const Settings = lazy(() => import('./pages/Settings'));
 
 // Componente de carga

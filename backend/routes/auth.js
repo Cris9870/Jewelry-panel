@@ -22,14 +22,14 @@ router.post('/login', [
     );
 
     if (rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
     }
 
     const user = rows[0];
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Usuario o contraseña incorrectos' });
     }
 
     const token = jwt.sign(

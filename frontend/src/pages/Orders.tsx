@@ -4,7 +4,9 @@ import api from '../services/api';
 import { Order } from '../types';
 import OrderModal from '../components/OrderModal';
 import { format } from 'date-fns';
+// Importar CSS de Orders y del Modal para asegurar que se carguen
 import './Orders.css';
+import '../components/Modal.css';
 
 const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);

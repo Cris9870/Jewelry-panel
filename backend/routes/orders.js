@@ -154,6 +154,104 @@ router.post('/', authMiddleware, [
   }
 });
 
+// Actualizar pedido completo
+router.put('/:id', authMiddleware, async (req, res, next) => {
+  const connection = await global.db.getConnection();
+  
+  try {
+    await connection.beginTransaction();
+    
+    const { items, payment_method, status } = req.body;
+    const orderId = req.params.id;
+    
+    // Obtener el pedido actual para restaurar stock
+    const [currentOrder] = await connection.query(
+      'SELECT * FROM orders WHERE id = ?',
+      [orderId]
+    );
+    
+    if (currentOrder.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ error: 'Pedido no encontrado' });
+    }
+    
+    // Obtener items actuales para restaurar stock
+    const [currentItems] = await connection.query(
+      'SELECT * FROM order_items WHERE order_id = ?',
+      [orderId]
+    );
+    
+    // Restaurar stock de items actuales
+    for (const item of currentItems) {
+      await connection.query(
+        'UPDATE products SET stock = stock + ? WHERE id = ?',
+        [item.quantity, item.product_id]
+      );
+    }
+    
+    // Eliminar items actuales
+    await connection.query(
+      'DELETE FROM order_items WHERE order_id = ?',
+      [orderId]
+    );
+    
+    // Calcular nuevo total
+    let total = 0;
+    const productIds = items.map(item => item.product_id);
+    const [products] = await connection.query(
+      'SELECT id, price FROM products WHERE id IN (?)',
+      [productIds]
+    );
+    
+    const productMap = {};
+    products.forEach(p => productMap[p.id] = p);
+    
+    // Preparar nuevos items
+    const orderItemsData = items.map(item => {
+      const product = productMap[item.product_id];
+      const itemTotal = product.price * item.quantity;
+      total += itemTotal;
+      return [orderId, item.product_id, item.quantity, product.price, itemTotal];
+    });
+    
+    // Actualizar orden
+    await connection.query(
+      'UPDATE orders SET total = ?, payment_method = ?, status = ? WHERE id = ?',
+      [total, payment_method || 'Yape/Plin', status || 'pending', orderId]
+    );
+    
+    // Insertar nuevos items
+    await connection.query(
+      'INSERT INTO order_items (order_id, product_id, quantity, unit_price, total) VALUES ?',
+      [orderItemsData]
+    );
+    
+    // Actualizar stock con nuevas cantidades
+    const stockUpdates = items.map(item => 
+      `WHEN ${item.product_id} THEN stock - ${item.quantity}`
+    ).join(' ');
+    
+    await connection.query(
+      `UPDATE products 
+       SET stock = CASE id ${stockUpdates} ELSE stock END 
+       WHERE id IN (?)`,
+      [productIds]
+    );
+    
+    await connection.commit();
+    
+    res.json({ 
+      message: 'Pedido actualizado exitosamente',
+      total: total
+    });
+  } catch (error) {
+    await connection.rollback();
+    next(error);
+  } finally {
+    connection.release();
+  }
+});
+
 router.put('/:id/status', authMiddleware, async (req, res, next) => {
   try {
     const { status } = req.body;
