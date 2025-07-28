@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'));
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
+  host: process.env.DB_HOST || '127.0.0.1', // Forzar IPv4 por defecto
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
@@ -27,6 +27,16 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0
 });
+
+// Verificar conexión al inicio
+pool.getConnection()
+  .then(connection => {
+    console.log('✓ Conexión a MySQL establecida');
+    connection.release();
+  })
+  .catch(err => {
+    console.error('✗ Error conectando a MySQL:', err.message);
+  });
 
 global.db = pool;
 
