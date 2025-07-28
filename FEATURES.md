@@ -1,4 +1,4 @@
-# Sistema de Gestión para Joyerías - Características
+# Q'BellaJoyeria - Sistema de Gestión - Características
 
 ## 🎯 Descripción General
 

@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { X, Upload, Download } from 'lucide-react';
+import { X, Download } from 'lucide-react';
 import api from '../services/api';
 import './Modal.css';
 

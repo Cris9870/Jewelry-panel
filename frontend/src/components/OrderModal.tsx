@@ -1,11 +1,13 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { X, Plus, Trash2 } from 'lucide-react';
 import api from '../services/api';
-import { Product, Customer } from '../types';
+import { Product, Customer, Order } from '../types';
+import SearchableSelect from './SearchableSelect';
 import './Modal.css';
 import './OrderModal.css';
 
 interface OrderModalProps {
+  order?: Order;
   onClose: () => void;
 }
 
@@ -17,7 +19,7 @@ interface OrderItem {
   total: number;
 }
 
-const OrderModal = ({ onClose }: OrderModalProps) => {
+const OrderModal = ({ order, onClose }: OrderModalProps) => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<number | null>(null);
@@ -31,7 +33,26 @@ const OrderModal = ({ onClose }: OrderModalProps) => {
   useEffect(() => {
     fetchCustomers();
     fetchProducts();
-  }, []);
+    
+    if (order) {
+      // Cargar datos del pedido existente
+      setSelectedCustomer(order.customer_id);
+      setCustomerName(order.customer_name);
+      setPaymentMethod(order.payment_method);
+      setIsAnonymous(!order.customer_id);
+      
+      // Cargar items del pedido
+      if (order.items) {
+        setOrderItems(order.items.map(item => ({
+          product_id: item.product_id,
+          product: products.find(p => p.id === item.product_id),
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          total: item.total
+        })));
+      }
+    }
+  }, [order]);
 
   const fetchCustomers = async () => {
     try {
@@ -64,7 +85,9 @@ const OrderModal = ({ onClose }: OrderModalProps) => {
     setOrderItems(orderItems.filter((_, i) => i !== index));
   };
 
-  const handleProductChange = (index: number, productId: number) => {
+  const handleProductChange = (index: number, productId: number | null) => {
+    if (!productId) return;
+    
     const product = products.find(p => p.id === productId);
     if (!product) return;
 
@@ -73,8 +96,8 @@ const OrderModal = ({ onClose }: OrderModalProps) => {
       ...newItems[index],
       product_id: productId,
       product: product,
-      unit_price: product.price,
-      total: product.price * newItems[index].quantity
+      unit_price: parseFloat(String(product.price)),
+      total: parseFloat(String(product.price)) * newItems[index].quantity
     };
     setOrderItems(newItems);
   };
@@ -131,20 +154,38 @@ const OrderModal = ({ onClose }: OrderModalProps) => {
         }))
       };
 
-      await api.post('/orders', orderData);
+      if (order) {
+        await api.put(`/orders/${order.id}`, orderData);
+      } else {
+        await api.post('/orders', orderData);
+      }
+      
       onClose();
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Error al crear el pedido');
+      setError(err.response?.data?.error || 'Error al guardar el pedido');
     } finally {
       setLoading(false);
     }
   };
 
+  // Preparar opciones para los selects
+  const customerOptions = customers.map(customer => ({
+    id: customer.id,
+    label: customer.name,
+    subLabel: customer.dni || customer.phone || 'Sin datos'
+  }));
+
+  const productOptions = products.map(product => ({
+    id: product.id,
+    label: product.name,
+    subLabel: `S/ ${parseFloat(String(product.price)).toFixed(2)} - Stock: ${product.stock}`
+  }));
+
   return (
     <div className="modal-overlay">
       <div className="modal order-modal">
         <div className="modal-header">
-          <h2>Nuevo Pedido</h2>
+          <h2>{order ? 'Editar Pedido' : 'Nuevo Pedido'}</h2>
           <button className="modal-close" onClick={onClose}>
             <X size={24} />
           </button>
@@ -168,24 +209,18 @@ const OrderModal = ({ onClose }: OrderModalProps) => {
 
             {!isAnonymous && (
               <div className="form-group">
-                <label>Seleccionar Cliente</label>
-                <select
-                  value={selectedCustomer || ''}
-                  onChange={(e) => {
-                    const customerId = parseInt(e.target.value);
-                    setSelectedCustomer(customerId);
-                    const customer = customers.find(c => c.id === customerId);
+                <SearchableSelect
+                  label="Seleccionar Cliente"
+                  options={customerOptions}
+                  value={selectedCustomer}
+                  onChange={(value) => {
+                    setSelectedCustomer(value);
+                    const customer = customers.find(c => c.id === value);
                     setCustomerName(customer?.name || '');
                   }}
+                  placeholder="Buscar cliente por nombre o DNI..."
                   required={!isAnonymous}
-                >
-                  <option value="">Seleccione un cliente</option>
-                  {customers.map((customer) => (
-                    <option key={customer.id} value={customer.id}>
-                      {customer.name} - {customer.dni || 'Sin DNI'}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
             )}
           </div>
@@ -195,19 +230,17 @@ const OrderModal = ({ onClose }: OrderModalProps) => {
             <div className="order-items">
               {orderItems.map((item, index) => (
                 <div key={index} className="order-item-row">
-                  <select
-                    value={item.product_id}
-                    onChange={(e) => handleProductChange(index, parseInt(e.target.value))}
-                    className="product-select"
-                    required
-                  >
-                    <option value={0}>Seleccione un producto</option>
-                    {products.map((product) => (
-                      <option key={product.id} value={product.id} disabled={product.stock === 0}>
-                        {product.name} - S/ {product.price} (Stock: {product.stock})
-                      </option>
-                    ))}
-                  </select>
+                  <div className="product-select-wrapper">
+                    <SearchableSelect
+                      options={productOptions.filter(p => {
+                        const product = products.find(prod => prod.id === p.id);
+                        return product && product.stock > 0;
+                      })}
+                      value={item.product_id || null}
+                      onChange={(value) => handleProductChange(index, value)}
+                      placeholder="Buscar producto..."
+                    />
+                  </div>
                   
                   <input
                     type="number"
@@ -262,7 +295,7 @@ const OrderModal = ({ onClose }: OrderModalProps) => {
               Cancelar
             </button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Creando...' : 'Crear Pedido'}
+              {loading ? 'Guardando...' : order ? 'Actualizar Pedido' : 'Crear Pedido'}
             </button>
           </div>
         </form>

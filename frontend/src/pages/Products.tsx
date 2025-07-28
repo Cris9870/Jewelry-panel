@@ -118,13 +118,13 @@ const Products = () => {
                 <td>
                   <div className="product-name">
                     {product.image_url && (
-                      <img src={`http://localhost:5000${product.image_url}`} alt={product.name} />
+                      <img src={product.image_url} alt={product.name} />
                     )}
                     <span>{product.name}</span>
                   </div>
                 </td>
                 <td>{product.category_name || '-'}</td>
-                <td>S/ {product.price.toFixed(2)}</td>
+                <td>S/ {parseFloat(String(product.price)).toFixed(2)}</td>
                 <td>
                   <span className={`stock ${product.stock === 0 ? 'out-of-stock' : ''}`}>
                     {product.stock}

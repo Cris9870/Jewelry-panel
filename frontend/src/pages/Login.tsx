@@ -32,7 +32,7 @@ const Login = () => {
       <div className="login-card">
         <div className="login-header">
           <Gem className="login-logo" />
-          <h1>Luxora</h1>
+          <h1>Q'BellaJoyeria</h1>
           <p>Panel de Administración</p>
         </div>
 

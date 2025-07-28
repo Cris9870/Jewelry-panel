@@ -34,6 +34,7 @@ yarn-error.log*
 # Database
 *.sql
 !backend/database/schema.sql
+!backend/migrations/*.sql
 
 # Temporary files
 *.tmp

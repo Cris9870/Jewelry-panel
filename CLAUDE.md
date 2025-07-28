@@ -1,4 +1,4 @@
-# Jewelry Management Panel - Claude Code Guide
+# Q'BellaJoyeria - Claude Code Guide
 
 This guide provides essential information for Claude Code instances working on this codebase. The project is a jewelry store management system with features for inventory, orders, customers, and PDF generation.
 
@@ -39,8 +39,9 @@ DB_HOST=127.0.0.1  # MUST be 127.0.0.1, not localhost (IPv6 issue)
 DB_USER=jewelry_user
 DB_PASSWORD=your_password
 DB_NAME=jewelry_panel
-JWT_SECRET=your_jwt_secret
+JWT_SECRET=your_jwt_secret_super_largo_y_seguro_minimo_32_caracteres
 PORT=5000
+NODE_ENV=production
 ```
 
 ### Frontend API Configuration

@@ -31,9 +31,9 @@ const ProductModal = ({ product, categories, onClose }: ProductModalProps) => {
     const formDataToSend = new FormData();
     Object.keys(formData).forEach(key => {
       if (key === 'attributes') {
-        formDataToSend.append(key, JSON.stringify(formData[key]));
+        formDataToSend.append(key, JSON.stringify(formData[key as keyof typeof formData]));
       } else {
-        formDataToSend.append(key, formData[key].toString());
+        formDataToSend.append(key, formData[key as keyof typeof formData].toString());
       }
     });
 

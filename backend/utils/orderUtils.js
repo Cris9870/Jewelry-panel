@@ -8,8 +8,25 @@ function generateOrderId() {
 }
 
 async function generateOrderPDF(order) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
+      // Get company settings
+      let companyInfo = {
+        name: 'Q\'BellaJoyeria',
+        address: 'Av. Principal 123, Lima',
+        phone: '(01) 123-4567',
+        email: 'info@qbellajoyeria.com'
+      };
+      
+      try {
+        const [settings] = await global.db.query('SELECT * FROM company_settings LIMIT 1');
+        if (settings.length > 0) {
+          companyInfo = settings[0];
+        }
+      } catch (error) {
+        console.error('Error fetching company settings:', error);
+      }
+
       const doc = new PDFDocument({
         size: 'A4',
         margin: 50
@@ -29,11 +46,11 @@ async function generateOrderPDF(order) {
 
       // Company info
       doc.fontSize(16)
-         .text('Joyería Luxora', { align: 'left' })
+         .text(companyInfo.name, { align: 'left' })
          .fontSize(10)
-         .text('Dirección: Av. Principal 123, Lima')
-         .text('Teléfono: (01) 123-4567')
-         .text('Email: info@joyerialuxora.com')
+         .text(`Dirección: ${companyInfo.address}`)
+         .text(`Teléfono: ${companyInfo.phone}`)
+         .text(`Email: ${companyInfo.email}`)
          .moveDown();
 
       // Order info
@@ -65,14 +82,12 @@ async function generateOrderPDF(order) {
       // Table headers
       const tableTop = doc.y;
       const itemX = 50;
-      const skuX = 200;
-      const priceX = 280;
-      const quantityX = 350;
-      const totalX = 420;
+      const priceX = 320;
+      const quantityX = 400;
+      const totalX = 450;
 
       doc.fontSize(10)
          .text('Producto', itemX, tableTop, { bold: true })
-         .text('SKU', skuX, tableTop)
          .text('Precio Unit.', priceX, tableTop)
          .text('Cant.', quantityX, tableTop)
          .text('Total', totalX, tableTop);
@@ -87,14 +102,25 @@ async function generateOrderPDF(order) {
       
       if (order.items && order.items.length > 0) {
         order.items.forEach(item => {
+          // Product name
           doc.fontSize(9)
-             .text(item.name || '', itemX, yPosition)
-             .text(item.sku || '', skuX, yPosition)
+             .text(item.name || '', itemX, yPosition, { width: 250 });
+          
+          // SKU below product name with smaller font
+          if (item.sku) {
+            doc.fontSize(7)
+               .fillColor('#666666')
+               .text(`(SKU: ${item.sku})`, itemX, yPosition + 12, { width: 250 })
+               .fillColor('black');
+          }
+          
+          // Price, quantity and total on same line as product name
+          doc.fontSize(9)
              .text(`S/ ${parseFloat(item.unit_price).toFixed(2)}`, priceX, yPosition)
              .text(item.quantity.toString(), quantityX, yPosition)
              .text(`S/ ${parseFloat(item.total).toFixed(2)}`, totalX, yPosition);
           
-          yPosition += 20;
+          yPosition += item.sku ? 35 : 25; // More space if SKU is present
         });
       }
 
@@ -108,8 +134,7 @@ async function generateOrderPDF(order) {
 
       // Footer
       doc.fontSize(10)
-         .text('¡Gracias por su compra!', 50, doc.page.height - 100, { align: 'center' })
-         .text('Este documento no incluye IGV', { align: 'center' });
+         .text('¡Gracias por su compra!', 50, doc.page.height - 100, { align: 'center' });
 
       // Finalize PDF
       doc.end();

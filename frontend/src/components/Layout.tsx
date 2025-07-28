@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LayoutDashboard, Package, Users, ShoppingBag, LogOut, Gem } from 'lucide-react';
+import { LayoutDashboard, Package, Users, ShoppingBag, Settings, LogOut, Gem } from 'lucide-react';
 import './Layout.css';
 
 const Layout = () => {
@@ -9,9 +9,10 @@ const Layout = () => {
 
   const menuItems = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/orders', icon: ShoppingBag, label: 'All Orders' },
-    { path: '/products', icon: Package, label: 'Products' },
-    { path: '/customers', icon: Users, label: 'Customers' },
+    { path: '/orders', icon: ShoppingBag, label: 'Pedidos' },
+    { path: '/products', icon: Package, label: 'Productos' },
+    { path: '/customers', icon: Users, label: 'Clientes' },
+    { path: '/settings', icon: Settings, label: 'Configuración' },
   ];
 
   return (
@@ -19,7 +20,7 @@ const Layout = () => {
       <aside className="sidebar">
         <div className="sidebar-header">
           <Gem className="logo-icon" />
-          <h2>Luxora</h2>
+          <h2>Q'BellaJoyeria</h2>
         </div>
         
         <nav className="sidebar-nav">
@@ -38,7 +39,7 @@ const Layout = () => {
         <div className="sidebar-footer">
           <button className="logout-btn" onClick={logout}>
             <LogOut size={20} />
-            <span>Log out</span>
+            <span>Cerrar sesión</span>
           </button>
         </div>
       </aside>

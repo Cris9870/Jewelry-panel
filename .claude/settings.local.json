@@ -6,7 +6,10 @@
       "Bash(npm create:*)",
       "Bash(npm install:*)",
       "Bash(rm:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(chmod:*)",
+      "Bash(./fix-frontend-build.sh:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": []
   }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DollarSign, ShoppingBag, CheckCircle, Clock, XCircle, TrendingUp } from 'lucide-react';
+import { DollarSign, ShoppingBag, CheckCircle, XCircle } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '../services/api';
 import { DashboardStats } from '../types';
@@ -34,15 +34,15 @@ const Dashboard = () => {
 
   const statsCards = [
     {
-      title: 'Total Sales',
-      value: `S/ ${stats.totalSales.toFixed(2)}`,
+      title: 'Ventas Totales',
+      value: `S/ ${parseFloat(String(stats.totalSales)).toFixed(2)}`,
       percentage: '75.55%',
       icon: DollarSign,
       color: 'warning',
       trend: 'up'
     },
     {
-      title: 'Total Orders',
+      title: '# de Órdenes',
       value: stats.totalOrders.toString(),
       percentage: '3%',
       icon: ShoppingBag,
@@ -50,7 +50,7 @@ const Dashboard = () => {
       trend: 'down'
     },
     {
-      title: 'Order Complete',
+      title: 'Órdenes Completadas',
       value: stats.completedOrders.toString(),
       percentage: '98%',
       icon: CheckCircle,
@@ -58,7 +58,7 @@ const Dashboard = () => {
       trend: 'up'
     },
     {
-      title: 'Cancel Order',
+      title: 'Órdenes Canceladas',
       value: stats.canceledOrders.toString(),
       percentage: '2%',
       icon: XCircle,
@@ -89,7 +89,7 @@ const Dashboard = () => {
                 <span className={`stat-percentage ${card.trend}`}>
                   {card.trend === 'up' ? '↑' : '↓'} {card.percentage}
                 </span>
-                <span className="stat-period">vs last month</span>
+                <span className="stat-period">vs mes anterior</span>
               </div>
             </div>
           </div>
@@ -99,10 +99,10 @@ const Dashboard = () => {
       <div className="dashboard-row">
         <div className="chart-container">
           <div className="section-header">
-            <h2>Revenue and Sales</h2>
+            <h2>Estadísticas de Ventas</h2>
             <div className="legend">
-              <span className="legend-item" data-color="blue">Revenue</span>
-              <span className="legend-item" data-color="red">Sales</span>
+              <span className="legend-item" data-color="blue">Ingresos</span>
+              <span className="legend-item" data-color="red">Ventas</span>
             </div>
           </div>
           <ResponsiveContainer width="100%" height={300}>
@@ -118,8 +118,8 @@ const Dashboard = () => {
 
         <div className="latest-orders">
           <div className="section-header">
-            <h2>Latest Order</h2>
-            <a href="/orders" className="view-all">See All</a>
+            <h2>Órdenes Recientes</h2>
+            <a href="/orders" className="view-all">Ver Todas</a>
           </div>
           <div className="orders-list">
             {stats.recentOrders.map((order) => (
@@ -129,7 +129,7 @@ const Dashboard = () => {
                   <p className="order-id">{order.order_id}</p>
                 </div>
                 <div className="order-details">
-                  <p className="order-total">S/ {order.total.toFixed(2)}</p>
+                  <p className="order-total">S/ {parseFloat(String(order.total)).toFixed(2)}</p>
                   <span className={`order-status status-${order.status.toLowerCase().replace(' ', '-')}`}>
                     {order.status}
                   </span>
