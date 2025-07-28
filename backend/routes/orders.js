@@ -214,11 +214,18 @@ router.put('/:id', authMiddleware, async (req, res, next) => {
       return [orderId, item.product_id, item.quantity, product.price, itemTotal];
     });
     
-    // Actualizar orden
-    await connection.query(
-      'UPDATE orders SET total = ?, payment_method = ?, status = ? WHERE id = ?',
-      [total, payment_method || 'Yape/Plin', status || 'pending', orderId]
-    );
+    // Actualizar orden (mantener el status actual si no se proporciona uno nuevo)
+    if (status) {
+      await connection.query(
+        'UPDATE orders SET total = ?, payment_method = ?, status = ? WHERE id = ?',
+        [total, payment_method || 'Yape/Plin', status, orderId]
+      );
+    } else {
+      await connection.query(
+        'UPDATE orders SET total = ?, payment_method = ? WHERE id = ?',
+        [total, payment_method || 'Yape/Plin', orderId]
+      );
+    }
     
     // Insertar nuevos items
     await connection.query(

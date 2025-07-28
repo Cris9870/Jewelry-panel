@@ -14,15 +14,14 @@ const Login = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
 
     try {
       await login(username, password);
+      setError(''); // Limpiar error solo si el login es exitoso
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Error al iniciar sesión');
-    } finally {
       setLoading(false);
     }
   };
