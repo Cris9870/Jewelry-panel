@@ -2,7 +2,9 @@ import { useState, useEffect, FormEvent } from 'react';
 import { X, Plus, Trash2 } from 'lucide-react';
 import api from '../services/api';
 import { Product, Customer, Order } from '../types';
+// Usar SearchableSelect virtualizado si hay muchos items
 import SearchableSelect from './SearchableSelect';
+import VirtualizedSearchableSelect from './VirtualizedSearchableSelect';
 import './Modal.css';
 import './OrderModal.css';
 
@@ -209,18 +211,33 @@ const OrderModal = ({ order, onClose }: OrderModalProps) => {
 
             {!isAnonymous && (
               <div className="form-group">
-                <SearchableSelect
-                  label="Seleccionar Cliente"
-                  options={customerOptions}
-                  value={selectedCustomer}
-                  onChange={(value) => {
-                    setSelectedCustomer(value);
-                    const customer = customers.find(c => c.id === value);
-                    setCustomerName(customer?.name || '');
-                  }}
-                  placeholder="Buscar cliente por nombre o DNI..."
-                  required={!isAnonymous}
-                />
+                {customers.length > 100 ? (
+                  <VirtualizedSearchableSelect
+                    label="Seleccionar Cliente"
+                    options={customerOptions}
+                    value={selectedCustomer}
+                    onChange={(value) => {
+                      setSelectedCustomer(value);
+                      const customer = customers.find(c => c.id === value);
+                      setCustomerName(customer?.name || '');
+                    }}
+                    placeholder="Buscar cliente por nombre o DNI..."
+                    required={!isAnonymous}
+                  />
+                ) : (
+                  <SearchableSelect
+                    label="Seleccionar Cliente"
+                    options={customerOptions}
+                    value={selectedCustomer}
+                    onChange={(value) => {
+                      setSelectedCustomer(value);
+                      const customer = customers.find(c => c.id === value);
+                      setCustomerName(customer?.name || '');
+                    }}
+                    placeholder="Buscar cliente por nombre o DNI..."
+                    required={!isAnonymous}
+                  />
+                )}
               </div>
             )}
           </div>
@@ -231,15 +248,27 @@ const OrderModal = ({ order, onClose }: OrderModalProps) => {
               {orderItems.map((item, index) => (
                 <div key={index} className="order-item-row">
                   <div className="product-select-wrapper">
-                    <SearchableSelect
-                      options={productOptions.filter(p => {
-                        const product = products.find(prod => prod.id === p.id);
-                        return product && product.stock > 0;
-                      })}
-                      value={item.product_id || null}
-                      onChange={(value) => handleProductChange(index, value)}
-                      placeholder="Buscar producto..."
-                    />
+                    {products.length > 100 ? (
+                      <VirtualizedSearchableSelect
+                        options={productOptions.filter(p => {
+                          const product = products.find(prod => prod.id === p.id);
+                          return product && product.stock > 0;
+                        })}
+                        value={item.product_id || null}
+                        onChange={(value) => handleProductChange(index, value)}
+                        placeholder="Buscar producto..."
+                      />
+                    ) : (
+                      <SearchableSelect
+                        options={productOptions.filter(p => {
+                          const product = products.find(prod => prod.id === p.id);
+                          return product && product.stock > 0;
+                        })}
+                        value={item.product_id || null}
+                        onChange={(value) => handleProductChange(index, value)}
+                        placeholder="Buscar producto..."
+                      />
+                    )}
                   </div>
                   
                   <input

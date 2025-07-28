@@ -103,24 +103,41 @@ router.post('/', authMiddleware, [
       [order_id, customer_id || null, customer_name || 'Anónimo', total, payment_method || 'Yape/Plin']
     );
     
-    for (const item of items) {
-      const [products] = await connection.query(
-        'SELECT price FROM products WHERE id = ?',
-        [item.product_id]
-      );
-      
-      const itemTotal = products[0].price * item.quantity;
-      
-      await connection.query(
-        'INSERT INTO order_items (order_id, product_id, quantity, unit_price, total) VALUES (?, ?, ?, ?, ?)',
-        [orderResult.insertId, item.product_id, item.quantity, products[0].price, itemTotal]
-      );
-      
-      await connection.query(
-        'UPDATE products SET stock = stock - ? WHERE id = ?',
-        [item.quantity, item.product_id]
-      );
-    }
+    // Obtener todos los productos en una sola consulta
+    const productIds = items.map(item => item.product_id);
+    const [products] = await connection.query(
+      'SELECT id, price FROM products WHERE id IN (?)',
+      [productIds]
+    );
+    
+    // Crear un mapa de productos para acceso rápido
+    const productMap = {};
+    products.forEach(p => productMap[p.id] = p);
+    
+    // Preparar datos para inserción batch
+    const orderItemsData = items.map(item => {
+      const product = productMap[item.product_id];
+      const itemTotal = product.price * item.quantity;
+      return [orderResult.insertId, item.product_id, item.quantity, product.price, itemTotal];
+    });
+    
+    // Insertar todos los items de una vez
+    await connection.query(
+      'INSERT INTO order_items (order_id, product_id, quantity, unit_price, total) VALUES ?',
+      [orderItemsData]
+    );
+    
+    // Actualizar stock de todos los productos en una consulta
+    const stockUpdates = items.map(item => 
+      `WHEN ${item.product_id} THEN stock - ${item.quantity}`
+    ).join(' ');
+    
+    await connection.query(
+      `UPDATE products 
+       SET stock = CASE id ${stockUpdates} ELSE stock END 
+       WHERE id IN (?)`,
+      [productIds]
+    );
     
     await connection.commit();
     

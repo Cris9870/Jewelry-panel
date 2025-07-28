@@ -2,6 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2/promise');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
 const customerRoutes = require('./routes/customers');
@@ -13,10 +16,39 @@ const { errorHandler } = require('./middleware/errorHandler');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Seguridad
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+
+// Compresión
+app.use(compression());
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100, // límite de requests por IP
+  message: 'Demasiadas solicitudes desde esta IP, intente más tarde.'
+});
+
+// Aplicar rate limiting solo a rutas API
+app.use('/api/', limiter);
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static('uploads'));
+
+// Archivos estáticos con cache headers
+app.use('/uploads', express.static('uploads', {
+  maxAge: '1d',
+  etag: true,
+  lastModified: true,
+  setHeaders: (res, path) => {
+    if (path.endsWith('.jpg') || path.endsWith('.png') || path.endsWith('.jpeg')) {
+      res.setHeader('Cache-Control', 'public, max-age=86400'); // 1 día
+    }
+  }
+}));
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST || '127.0.0.1', // Forzar IPv4 por defecto
@@ -24,8 +56,10 @@ const pool = mysql.createPool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+  connectionLimit: 20, // Aumentado para mejor concurrencia
+  queueLimit: 50, // Limitar cola de espera
+  acquireTimeout: 60000, // 60 segundos
+  connectTimeout: 60000
 });
 
 // Verificar conexión al inicio
