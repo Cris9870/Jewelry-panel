@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Verificar que estamos usando bash
+if [ -z "$BASH_VERSION" ]; then
+    echo "Este script debe ejecutarse con bash, no con sh"
+    echo "Usa: bash deploy-updates.sh"
+    exit 1
+fi
+
 echo "=== Script de Actualización del Panel de Joyería ==="
 echo "Este script actualizará tu aplicación con los últimos cambios"
 echo ""
@@ -14,24 +21,36 @@ NC='\033[0m' # No Color
 PROJECT_DIR="/opt/jewelry-panel"
 REPO_URL="https://github.com/Cris9870/Jewelry-panel"
 
+# Verificar si el directorio del proyecto existe
+if [ ! -d "$PROJECT_DIR" ]; then
+    printf "${RED}Error: El directorio $PROJECT_DIR no existe${NC}\n"
+    echo "¿Deseas clonar el proyecto ahora? (s/n)"
+    read -p "" CLONE_NOW
+    
+    if [ "$CLONE_NOW" = "s" ] || [ "$CLONE_NOW" = "S" ]; then
+        echo "Clonando el proyecto..."
+        cd /opt
+        git clone $REPO_URL jewelry-panel
+        cd $PROJECT_DIR
+    else
+        exit 1
+    fi
+fi
+
 # Cambiar al directorio del proyecto
-cd $PROJECT_DIR
+cd $PROJECT_DIR || exit 1
 
 # Verificar que estamos en el directorio correcto
 if [ ! -f "package.json" ] || [ ! -d "backend" ] || [ ! -d "frontend" ]; then
-    echo -e "${RED}Error: No se encuentra el proyecto en $PROJECT_DIR${NC}"
-    echo "Verificando si el directorio existe..."
-    if [ ! -d "$PROJECT_DIR" ]; then
-        echo -e "${RED}El directorio $PROJECT_DIR no existe${NC}"
-    else
-        echo -e "${RED}El directorio existe pero no contiene el proyecto${NC}"
-    fi
+    printf "${RED}Error: El directorio no contiene un proyecto válido${NC}\n"
+    echo "Contenido del directorio:"
+    ls -la
     exit 1
 fi
 
 # Función para verificar comandos
 check_command() {
-    if ! command -v $1 &> /dev/null; then
+    if ! which $1 > /dev/null 2>&1; then
         echo -e "${RED}Error: $1 no está instalado${NC}"
         exit 1
     fi
@@ -39,12 +58,18 @@ check_command() {
 
 # Verificar dependencias
 echo "Verificando dependencias..."
-check_command git
-check_command node
-check_command npm
-check_command mysql
+for cmd in git node npm mysql; do
+    if which $cmd > /dev/null 2>&1; then
+        printf "${GREEN}✓ $cmd está instalado${NC}\n"
+    else
+        printf "${RED}✗ $cmd no está instalado${NC}\n"
+        echo "Por favor instala $cmd antes de continuar"
+        exit 1
+    fi
+done
 
-echo -e "${GREEN}✓ Todas las dependencias están instaladas${NC}"
+echo ""
+printf "${GREEN}✓ Todas las dependencias están instaladas${NC}\n"
 echo ""
 
 # Hacer backup de la base de datos
@@ -58,9 +83,9 @@ BACKUP_FILE="backup_$(date +%Y%m%d_%H%M%S).sql"
 mysqldump -h $DB_HOST -u $DB_USER -p$DB_PASS $DB_NAME > $BACKUP_FILE
 
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✓ Backup creado: $BACKUP_FILE${NC}"
+    printf "${GREEN}✓ Backup creado: $BACKUP_FILE${NC}\n"
 else
-    echo -e "${RED}Error al crear backup. Abortando...${NC}"
+    printf "${RED}Error al crear backup. Abortando...${NC}\n"
     exit 1
 fi
 
@@ -75,7 +100,7 @@ git stash push -m "Auto stash before update" -- . ':!backend/.env'
 # Verificar si tenemos el remote correcto
 CURRENT_REMOTE=$(git config --get remote.origin.url)
 if [ "$CURRENT_REMOTE" != "$REPO_URL" ] && [ "$CURRENT_REMOTE" != "${REPO_URL}.git" ]; then
-    echo -e "${YELLOW}Actualizando URL del repositorio remoto...${NC}"
+    printf "${YELLOW}Actualizando URL del repositorio remoto...${NC}\n"
     git remote set-url origin $REPO_URL
 fi
 
@@ -83,12 +108,12 @@ fi
 git pull origin main
 
 if [ $? -ne 0 ]; then
-    echo -e "${RED}Error al obtener cambios. Verifica tu conexión y permisos${NC}"
+    printf "${RED}Error al obtener cambios. Verifica tu conexión y permisos${NC}\n"
     echo "Intentando con fetch y merge..."
     git fetch origin main
     git merge origin/main
     if [ $? -ne 0 ]; then
-        echo -e "${RED}No se pudieron obtener los cambios${NC}"
+        printf "${RED}No se pudieron obtener los cambios${NC}\n"
         exit 1
     fi
 fi
@@ -114,7 +139,7 @@ if [ -d "migrations" ]; then
             echo "Aplicando: $migration"
             mysql -h $DB_HOST -u $DB_USER -p$DB_PASS $DB_NAME < "$migration"
             if [ $? -ne 0 ]; then
-                echo -e "${YELLOW}Advertencia: Error al aplicar $migration${NC}"
+                printf "${YELLOW}Advertencia: Error al aplicar $migration${NC}\n"
             fi
         fi
     done
@@ -138,7 +163,7 @@ echo "Construyendo el frontend..."
 npm run build
 
 if [ $? -ne 0 ]; then
-    echo -e "${RED}Error al construir el frontend${NC}"
+    printf "${RED}Error al construir el frontend${NC}\n"
     exit 1
 fi
 
@@ -151,9 +176,9 @@ echo "Reiniciando servicios..."
 pm2 restart ecosystem.config.js
 
 if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✓ Servicios reiniciados correctamente${NC}"
+    printf "${GREEN}✓ Servicios reiniciados correctamente${NC}\n"
 else
-    echo -e "${YELLOW}Advertencia: No se pudo reiniciar con PM2, intenta reiniciar manualmente${NC}"
+    printf "${YELLOW}Advertencia: No se pudo reiniciar con PM2, intenta reiniciar manualmente${NC}\n"
 fi
 
 # Verificar estado de los servicios
@@ -162,7 +187,7 @@ echo "Estado de los servicios:"
 pm2 status
 
 echo ""
-echo -e "${GREEN}=== Actualización completada ===${NC}"
+printf "${GREEN}=== Actualización completada ===${NC}\n"
 echo ""
 echo "Cambios importantes aplicados:"
 echo "- ✓ PDF mejorado: SKU ahora aparece debajo del nombre del producto"
@@ -171,7 +196,7 @@ echo "- ✓ Nueva página de configuración de empresa disponible en /settings"
 echo "- ✓ Interfaz completamente traducida al español"
 echo "- ✓ Búsqueda mejorada en selección de clientes y productos"
 echo ""
-echo -e "${YELLOW}Nota: Si encuentras algún problema, puedes restaurar el backup con:${NC}"
+printf "${YELLOW}Nota: Si encuentras algún problema, puedes restaurar el backup con:${NC}\n"
 echo "mysql -h $DB_HOST -u $DB_USER -p $DB_NAME < $BACKUP_FILE"
 echo ""
 echo "¡Tu panel está actualizado y listo para usar!"
