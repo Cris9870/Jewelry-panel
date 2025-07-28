@@ -47,11 +47,20 @@ async function generateOrderPDF(order) {
       // Company info
       doc.fontSize(16)
          .text(companyInfo.name, { align: 'left' })
-         .fontSize(10)
-         .text(`Dirección: ${companyInfo.address}`)
-         .text(`Teléfono: ${companyInfo.phone}`)
-         .text(`Email: ${companyInfo.email}`)
-         .moveDown();
+         .fontSize(10);
+      
+      // Solo mostrar campos si tienen valor
+      if (companyInfo.address && companyInfo.address.trim()) {
+        doc.text(`Dirección: ${companyInfo.address}`);
+      }
+      if (companyInfo.phone && companyInfo.phone.trim()) {
+        doc.text(`Teléfono: ${companyInfo.phone}`);
+      }
+      if (companyInfo.email && companyInfo.email.trim()) {
+        doc.text(`Email: ${companyInfo.email}`);
+      }
+      
+      doc.moveDown();
 
       // Order info
       doc.fontSize(12)

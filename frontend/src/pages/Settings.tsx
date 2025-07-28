@@ -90,39 +90,36 @@ const Settings = () => {
             <div className="form-group">
               <label>
                 <Mail size={18} />
-                Email
+                Email (Opcional)
               </label>
               <input
                 type="email"
                 value={settings.email}
                 onChange={(e) => setSettings({ ...settings, email: e.target.value })}
-                required
               />
             </div>
 
             <div className="form-group">
               <label>
                 <Phone size={18} />
-                Teléfono
+                Teléfono (Opcional)
               </label>
               <input
                 type="text"
                 value={settings.phone}
                 onChange={(e) => setSettings({ ...settings, phone: e.target.value })}
-                required
               />
             </div>
 
             <div className="form-group">
               <label>
                 <MapPin size={18} />
-                Dirección
+                Dirección (Opcional)
               </label>
               <textarea
                 value={settings.address}
                 onChange={(e) => setSettings({ ...settings, address: e.target.value })}
                 rows={3}
-                required
               />
             </div>
           </div>

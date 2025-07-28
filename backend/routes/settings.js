@@ -46,6 +46,11 @@ router.put('/company', checkAuth, async (req, res) => {
   try {
     const { name, email, phone, address } = req.body;
     
+    // Validar que al menos el nombre esté presente
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'El nombre de la empresa es obligatorio' });
+    }
+    
     // Por ahora solo actualizar si tenemos DB
     if (global.db) {
       try {
@@ -54,12 +59,12 @@ router.put('/company', checkAuth, async (req, res) => {
         if (existing.length === 0) {
           await global.db.query(
             'INSERT INTO company_settings (name, email, phone, address) VALUES (?, ?, ?, ?)',
-            [name, email, phone, address]
+            [name, email || '', phone || '', address || '']
           );
         } else {
           await global.db.query(
             'UPDATE company_settings SET name = ?, email = ?, phone = ?, address = ? WHERE id = ?',
-            [name, email, phone, address, existing[0].id]
+            [name, email || '', phone || '', address || '', existing[0].id]
           );
         }
       } catch (dbError) {

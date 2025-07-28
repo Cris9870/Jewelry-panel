@@ -251,7 +251,7 @@ const OrderModal = ({ order, onClose }: OrderModalProps) => {
                     required
                   />
                   
-                  <span className="item-total">S/ {item.total.toFixed(2)}</span>
+                  <span className="item-total">S/ {parseFloat(String(item.total)).toFixed(2)}</span>
                   
                   <button
                     type="button"
@@ -270,7 +270,7 @@ const OrderModal = ({ order, onClose }: OrderModalProps) => {
             </div>
             
             <div className="order-total">
-              <strong>Total:</strong> S/ {calculateTotal().toFixed(2)}
+              <strong>Total:</strong> S/ {parseFloat(String(calculateTotal())).toFixed(2)}
             </div>
           </div>
 
